@@ -1,0 +1,41 @@
+digraph G {
+  graph [rankdir=TB, fontname="Liberation Sans", fontsize=12, nodesep=0.35, ranksep=0.32, bgcolor="white"];
+  node  [shape=box, style="rounded,filled", fillcolor="#EEF3FA", color="#3B5B8C", fontname="Liberation Sans", fontsize=11, width=3.6];
+  edge  [color="#3B5B8C", fontname="Liberation Sans", fontsize=10];
+
+  start [label="Выпуск версии 2.4.0\n(CI: сборка, тесты, manifest.json, подпись)", shape=box, fillcolor="#DDE8F7"];
+  ring0 [label="Кольцо 0 — испытательный стенд\nupdate + Health Check, акт готовности"];
+  ok0   [label="Акт: ГОТОВО?", shape=diamond, fillcolor="#FFF6DA", color="#B58A00", width=2.2];
+  ring1 [label="Кольцо 1 — Canary: 1 АРМ (≈5 %)\nпост охраны спорткомплекса, окно 22:30–23:30"];
+  mon1  [label="Наблюдение 24 ч: ошибки, задержки,\nобращения в Service Desk"];
+  ok1   [label="Метрики в норме?", shape=diamond, fillcolor="#FFF6DA", color="#B58A00", width=2.2];
+  ring2 [label="Кольцо 2 — 25 % АРМ (по одному на корпус)"];
+  ring3 [label="Кольцо 3 — все АРМ (100 %)\nканал Stable"];
+  done  [label="Закрытие Change Request,\nCHANGELOG, акты в архив", fillcolor="#E3F4E5", color="#2E7D32"];
+
+  subgraph cluster_arm {
+    label="Процедура на каждом АРМ (campus-healthcheck update)"; fontname="Liberation Sans"; fontsize=11; color="#9AA9BF"; style="dashed";
+    a1 [label="1. Проверка пакета: SHA-256 по manifest.json"];
+    a2 [label="2. Backup: ZIP (кэш, appsettings.json, SQLite)"];
+    a3 [label="3. Снимок контрольных сумм data/"];
+    a4 [label="4. Установка файлов + перенос новых ключей конфигурации"];
+    a5 [label="5. Контроль целостности данных"];
+    a6 [label="6. Health Check: CFG, версия, SQLite,\nPostgreSQL, API, считыватель, диск"];
+    a7 [label="Критичный сбой?", shape=diamond, fillcolor="#FFF6DA", color="#B58A00", width=2.2];
+    rb [label="Rollback: восстановление из ZIP,\nповторная проверка, акт «НЕ ГОТОВО»", fillcolor="#FBE3E3", color="#C62828"];
+    act [label="Акт готовности АРМ (MD + JSON)", fillcolor="#E3F4E5", color="#2E7D32"];
+    a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7;
+    a7 -> rb [label=" да"];
+    a7 -> act [label=" нет"];
+  }
+
+  start -> ring0 -> a1 [style=dashed, arrowhead=none];
+  ring0 -> ok0;
+  ok0 -> ring1 [label=" да"];
+  ok0 -> start [label=" нет: исправить сборку", constraint=false, color="#C62828", fontcolor="#C62828"];
+  ring1 -> mon1 -> ok1;
+  ok1 -> ring2 [label=" да"];
+  ok1 -> stop  [label=" нет"];
+  stop [label="Остановка раскатки,\nоткат Canary-АРМ, инцидент", fillcolor="#FBE3E3", color="#C62828"];
+  ring2 -> ring3 -> done;
+}

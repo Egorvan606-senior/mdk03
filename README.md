@@ -6,3 +6,4 @@
 | Работа | Тема | Папка |
 |---|---|---|
 | № 5 | Безопасные релизные процессы, Expand and Contract, Docs-as-Code (CAMPUS-110, «Спортивный комплекс») | [homework-5](homework-5/REPORT.md) |
+| № 6 | CALS-технологии: регламент обновления АРМ, тестер Health Check после обновления | [homework-6](homework-6) |
