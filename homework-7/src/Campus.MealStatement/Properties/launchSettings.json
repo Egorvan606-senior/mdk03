@@ -1,0 +1,19 @@
+{
+  "profiles": {
+    "1. Ведомость за октябрь 2026": {
+      "commandName": "Project",
+      "commandLineArgs": "--month 2026-10",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "2. API недоступен (работа по кэшу)": {
+      "commandName": "Project",
+      "commandLineArgs": "--month 2026-10 --source https://jsonplaceholder.typicode.com/posts-unavailable",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "3. Неверный параметр месяца": {
+      "commandName": "Project",
+      "commandLineArgs": "--month 10.2026",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}

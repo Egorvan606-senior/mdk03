@@ -1,0 +1,29 @@
+{
+  "profiles": {
+    "1. check — АРМ до обновления": {
+      "commandName": "Project",
+      "commandLineArgs": "check",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "2. update — повреждённый пакет": {
+      "commandName": "Project",
+      "commandLineArgs": "update --package ..\\..\\stand\\packages\\2.4.0-damaged",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "3. update — сбой считывателя (откат)": {
+      "commandName": "Project",
+      "commandLineArgs": "update --package ..\\..\\stand\\packages\\2.4.0 --emulators db",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "4. update — штатное обновление": {
+      "commandName": "Project",
+      "commandLineArgs": "update --package ..\\..\\stand\\packages\\2.4.0",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "5. check — АРМ после обновления": {
+      "commandName": "Project",
+      "commandLineArgs": "check",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}
