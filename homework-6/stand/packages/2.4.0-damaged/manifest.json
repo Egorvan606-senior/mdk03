@@ -1,0 +1,31 @@
+{
+  "Version": "2.4.0",
+  "Channel": "Stable",
+  "BuiltAt": "2026-10-23T01:37:05.0195925+03:00",
+  "Files": [
+    {
+      "Path": "RELEASE_NOTES.txt",
+      "Sha256": "8e5fceb649a69c169a5b061822ff43d2fbbe0f1c712c014f8d5e696696be9d13"
+    },
+    {
+      "Path": "appsettings.template.json",
+      "Sha256": "5f4160650ebe84bac46853e572a445153208deb47a63805e45581d53adc8de5e"
+    },
+    {
+      "Path": "bin/Campus.Core.dll",
+      "Sha256": "964a0f057aed50bc56876cb661ff2ae71ad686550c6105ab1c575540217d8db0"
+    },
+    {
+      "Path": "bin/Campus.HealthProbe.dll",
+      "Sha256": "965c9429b8e2f450afdb909357c3931628ab6b7231de6c20ea384719801393f9"
+    },
+    {
+      "Path": "bin/Campus.Operator.dll",
+      "Sha256": "931a5b405aa5769138c06e73caf5019b1cbd71b99db6ee8473ff9413b7b9bf0b"
+    },
+    {
+      "Path": "bin/Campus.Operator.exe",
+      "Sha256": "f06acef0012d445ad3189865ca6ac053cbe06bf04f707efb3b56516038f63ccc"
+    }
+  ]
+}

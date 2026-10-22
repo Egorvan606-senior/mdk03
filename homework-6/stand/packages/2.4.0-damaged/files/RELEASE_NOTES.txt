@@ -1,0 +1,3 @@
+Campus Operator 2.4.0
+- Health Check после обновления
+- Телеметрия OpenTelemetry
