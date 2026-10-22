@@ -1,0 +1,13 @@
+$ dotnet test --filter Category=Sanity   (SANITY_BASE_URL не задан)
+  [SKIP] ProductionSanityTests.CreateBooking_InNewTimeRangeFormat_IsStoredAndReturnedWithLegacyField: Production sanity: не задана переменная окружения SANITY_BASE_URL.
+  [SKIP] ProductionSanityTests.CreateBooking_InLegacyTimeSlotFormat_StillAccepted: Production sanity: не задана переменная окружения SANITY_BASE_URL.
+
+Итого: пройдено 0, упало 0, пропущено 2
+
+$ set SANITY_BASE_URL=http://127.0.0.1:5110 & set SANITY_TOKEN=*** & dotnet test --filter Category=Sanity
+         cleanup: OK (CreateBooking_InNewTimeRangeFormat_IsStoredAndReturnedWithLegacyField)
+  [PASS] ProductionSanityTests.CreateBooking_InNewTimeRangeFormat_IsStoredAndReturnedWithLegacyField (295 ms)
+         cleanup: OK (CreateBooking_InLegacyTimeSlotFormat_StillAccepted)
+  [PASS] ProductionSanityTests.CreateBooking_InLegacyTimeSlotFormat_StillAccepted (11 ms)
+
+Итого: пройдено 2, упало 0, пропущено 0

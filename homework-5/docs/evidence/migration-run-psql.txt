@@ -1,0 +1,96 @@
+$ psql -d campus -f 00_baseline.sql
+[exit=0]
+$ psql -d campus -f seed.sql
+[exit=0]
+   time_slot   | count 
+---------------+-------
+ 7:00-8:30     |   855
+ 10:00-11:30   |   855
+ 19:00-20:30   |   849
+ 16:00-17:30   |   848
+ 13:00-14:30   |   848
+ 10.00 - 11.30 |   143
+ 19.00 - 20.30 |   142
+(7 rows)
+
+$ psql -d campus -f 01_expand.sql
+[exit=0]
+--- старый клиент v1.8 пишет только time_slot (триггер заполняет time_range)
+  time_slot  |     time_range      
+-------------+---------------------
+ 18:00-19:30 | [18:00:00,19:30:00)
+(1 row)
+
+INSERT 0 1
+--- новый клиент v1.9 пишет обе колонки (dual write)
+  time_slot  |     time_range      
+-------------+---------------------
+ 19:30-21:00 | [19:30:00,21:00:00)
+(1 row)
+
+INSERT 0 1
+$ psql -d campus -f 02_migrate.sql
+psql:02_migrate.sql:73: NOTICE:  CAMPUS-110 backfill: пачка 1, обработано 1000, перенесено всего 998, ошибок 2
+psql:02_migrate.sql:73: NOTICE:  CAMPUS-110 backfill: пачка 2, обработано 1000, перенесено всего 1988, ошибок 12
+psql:02_migrate.sql:73: NOTICE:  CAMPUS-110 backfill: пачка 3, обработано 1000, перенесено всего 2981, ошибок 19
+psql:02_migrate.sql:73: NOTICE:  CAMPUS-110 backfill: пачка 4, обработано 1000, перенесено всего 3973, ошибок 27
+psql:02_migrate.sql:73: NOTICE:  CAMPUS-110 backfill: пачка 5, обработано 1000, перенесено всего 4965, ошибок 35
+psql:02_migrate.sql:73: NOTICE:  CAMPUS-110 backfill завершён: пачек 5, ошибок 35
+ not_migrated | migrated | total 
+--------------+----------+-------
+           35 |     4967 |  5002
+(1 row)
+
+ mismatches 
+------------
+          0
+(1 row)
+
+              booking_id              |  time_slot  |            reason            |           logged_at           
+--------------------------------------+-------------+------------------------------+-------------------------------
+  ... (35 строк журнала ошибок, идентификаторы опущены)
+
+[exit=0]
+--- попытка contract с неразобранными ошибками (защита срабатывает)
+$ psql -d campus -f 03_contract.sql
+psql:03_contract.sql:40: ERROR:  CAMPUS-110 contract отменён: 35 строк без time_range (см. sport.bookings_migration_errors)
+CONTEXT:  PL/pgSQL function inline_code_block line 10 at RAISE
+[exit=3]
+--- оператор исправил ошибочные записи по журналу
+UPDATE 35
+DELETE 35
+ not_migrated 
+--------------
+            0
+(1 row)
+
+$ psql -d campus -f 03_contract.sql
+[exit=0]
+                                    Table "sport.bookings"
+    Column    |           Type           | Collation | Nullable |           Default           
+--------------+--------------------------+-----------+----------+-----------------------------
+ id           | uuid                     |           | not null | gen_random_uuid()
+ facility_id  | integer                  |           | not null | 
+ student_id   | character varying(32)    |           | not null | 
+ booking_date | date                     |           | not null | 
+ status       | character varying(16)    |           | not null | 'Active'::character varying
+ created_by   | character varying(64)    |           | not null | 'app'::character varying
+ created_at   | timestamp with time zone |           | not null | now()
+ time_range   | sport.timerange          |           | not null | 
+Indexes:
+    "bookings_pkey" PRIMARY KEY, btree (id)
+    "ex_bookings_no_overlap" EXCLUDE USING gist (facility_id WITH =, booking_date WITH =, time_range WITH &&) WHERE (status::text = 'Active'::text)
+    "ix_bookings_facility_date" btree (facility_id, booking_date)
+Check constraints:
+    "ck_bookings_time_range_valid" CHECK (NOT isempty(time_range) AND lower_inc(time_range) AND NOT upper_inc(time_range))
+
+--- проверка запрета пересечений (бронь 18:30-19:00 пересекается с 18:00-19:30)
+ERROR:  conflicting key value violates exclusion constraint "ex_bookings_no_overlap"
+DETAIL:  Key (facility_id, booking_date, time_range)=(5, 2026-12-15, [18:30:00,19:00:00)) conflicts with existing key (facility_id, booking_date, time_range)=(5, 2026-12-15, [18:00:00,19:30:00)).
+ jira_issue |  phase   |     script      |     applied_at      
+------------+----------+-----------------+---------------------
+ CAMPUS-110 | expand   | 01_expand.sql   | 2026-10-22 22:22:02
+ CAMPUS-110 | migrate  | 02_migrate.sql  | 2026-10-22 22:22:02
+ CAMPUS-110 | contract | 03_contract.sql | 2026-10-22 22:22:02
+(3 rows)
+

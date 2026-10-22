@@ -1,0 +1,16 @@
+$ dotnet test --filter Category=Unit
+  [PASS] TimeRangeTests.TryParseLegacy_ValidFormats_AreParsed("18:00-19:30", "18:00", "19:30") (15 ms)
+  [PASS] TimeRangeTests.TryParseLegacy_ValidFormats_AreParsed("9:00-10:00", "09:00", "10:00") (1 ms)
+  [PASS] TimeRangeTests.TryParseLegacy_ValidFormats_AreParsed("18.00 - 19.30", "18:00", "19:30") (0 ms)
+  [PASS] TimeRangeTests.TryParseLegacy_ValidFormats_AreParsed(" 07:00–08:30 ", "07:00", "08:30") (0 ms)
+  [PASS] TimeRangeTests.TryParseLegacy_InvalidValues_ReturnFalse("") (0 ms)
+  [PASS] TimeRangeTests.TryParseLegacy_InvalidValues_ReturnFalse("весь день") (0 ms)
+  [PASS] TimeRangeTests.TryParseLegacy_InvalidValues_ReturnFalse("19:00-18:00") (0 ms)
+  [PASS] TimeRangeTests.TryParseLegacy_InvalidValues_ReturnFalse("25:00-26:00") (0 ms)
+  [PASS] TimeRangeTests.TryParseLegacy_InvalidValues_ReturnFalse("18:00-18:00") (0 ms)
+  [PASS] TimeRangeTests.TryParseLegacy_Null_ReturnsFalse (0 ms)
+  [PASS] TimeRangeTests.Overlaps_AdjacentSlots_DoNotOverlap (0 ms)
+  [PASS] TimeRangeTests.Conversions_AreCompatibleWithPostgresAndLegacyFormat (0 ms)
+  [PASS] TimeRangeTests.Rules_RejectBookingOutsideOpeningHours (1 ms)
+
+Итого: пройдено 13, упало 0, пропущено 0

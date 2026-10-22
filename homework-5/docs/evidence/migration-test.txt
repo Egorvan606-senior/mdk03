@@ -1,0 +1,16 @@
+== 1. Чистая БД и исходная схема
+NOTICE:  database "campus_ci" does not exist, skipping
+== 2. Expand (два прогона — проверка идемпотентности)
+== 3. Старый клиент пишет только time_slot -> триггер заполняет time_range
+   time_slot '18:00-19:30' -> time_range [18:00:00,19:30:00)
+== 4. Откат expand и повторное применение
+psql:migrations/rollback/01_expand_down.sql:13: NOTICE:  procedure sport.backfill_time_range(pg_catalog.int4) does not exist, skipping
+== 5. Migrate
+   перенесено: 4966, в журнале ошибок: 35
+== 6. Contract должен ОТКАЗАТЬСЯ работать при неразобранных ошибках
+   contract отменён предусловием — OK
+== 7. Исправление данных и Contract
+   колонка time_slot удалена, time_range NOT NULL
+== 8. Запрет пересечений после Contract
+   пересекающаяся бронь отклонена (ex_bookings_no_overlap) — OK
+OK: все проверки миграций CAMPUS-110 пройдены
