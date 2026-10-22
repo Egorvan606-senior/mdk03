@@ -1,0 +1,8 @@
+{
+  // Источник транзакций питания (публичное учебное API по варианту 10)
+  "SourceUrl": "https://jsonplaceholder.typicode.com/posts",
+  // Папка ведомостей (относительно текущей папки запуска)
+  "OutputDir": "statements",
+  "TimeoutSeconds": 10,
+  "Retries": 3
+}
