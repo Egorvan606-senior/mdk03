@@ -1,0 +1,37 @@
+{
+  // Настройки утилиты campus-healthcheck (пути — относительно этого файла).
+  // На боевом АРМ: InstallDir = C:\Program Files\SmartCampus\Operator, эмуляторы выключены.
+  // Ниже — испытательный стенд из папки homework-6/stand (запуск из Visual Studio).
+  "InstallDir": "../../../../../stand/arm",
+  "ExpectedVersion": "2.4.0",
+  "ArmConfigFile": "appsettings.json",
+  "RequiredConfigKeys": [
+    "Arm:Id",
+    "Api:ExternalCheckUrl",
+    "CentralDb:Host",
+    "CentralDb:Port",
+    "LocalDb:Path",
+    "CardReader:Host",
+    "CardReader:Port"
+  ],
+  "Thresholds": {
+    "CentralDbWarnMs": 200,
+    "ApiWarnMs": 1500,
+    "ReaderWarnMs": 150,
+    "MinFreeDiskMb": 500
+  },
+  "Timeouts": {
+    "CentralDbMs": 3000,
+    "ApiMs": 5000,
+    "ReaderMs": 2000
+  },
+  "NetworkRetries": 3,
+  "Emulators": {
+    "CardReader": true,
+    "CentralDb": true
+  },
+  "ProtectedData": [ "data" ],
+  "ReportsDir": "../../../../../stand/reports",
+  "LogsDir": "../../../../../stand/logs",
+  "BackupsDir": "../../../../../stand/backups"
+}
