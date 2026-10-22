@@ -1,0 +1,55 @@
+name: homework-5 CI (CAMPUS-110)
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ "homework-5/**", ".github/workflows/homework-5-ci.yml" ]
+  pull_request:
+    branches: [ main ]
+    paths: [ "homework-5/**", ".github/workflows/homework-5-ci.yml" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: build-and-test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: homework-5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore SmartCampus.Sport.sln
+
+      - name: Build
+        run: dotnet build SmartCampus.Sport.sln -c Release --no-restore
+
+      - name: Unit tests (sanity-тест пропускается без SANITY_BASE_URL)
+        run: dotnet test SmartCampus.Sport.sln -c Release --no-build --filter "Category!=Sanity" --logger "console;verbosity=normal"
+
+  db-migrations:
+    name: db-migrations
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: [ "5432:5432" ]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Expand -> Migrate -> Contract на PostgreSQL 16
+        run: bash homework-5/db/test/run_migration_test.sh
