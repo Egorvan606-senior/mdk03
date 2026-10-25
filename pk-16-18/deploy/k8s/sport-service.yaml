@@ -1,0 +1,137 @@
+# sport-service v1.6.0 — модуль «Спортивный комплекс» ИС «Умный кампус»
+# Задача Jira: CAMPUS-110, Change Request: CR-2026-110 (окно 28.10.2026 02:00–04:00 МСК)
+#
+# Применение (шаг 2 плана работ CR-2026-110, после фазы Expand):
+#   kubectl apply -f deploy/k8s/sport-service.yaml
+#   kubectl rollout status deployment/sport-service -n production --timeout=10m
+#
+# Что в манифесте обеспечивает быстрый откат:
+#   * revisionHistoryLimit: 10 — Kubernetes хранит ReplicaSet прошлых версий,
+#     поэтому `kubectl rollout undo` возвращает v1.5.3 примерно за 30 секунд;
+#   * аннотация kubernetes.io/change-cause — номер CR и задачи виден
+#     в `kubectl rollout history` (цифровой след CAMPUS-110 до уровня кластера);
+#   * maxUnavailable: 0 + readinessProbe — трафик получают только готовые поды,
+#     при сбое новой версии старые поды продолжают обслуживать запросы;
+#   * progressDeadlineSeconds: 180 — зависшая выкатка помечается как неуспешная,
+#     `kubectl rollout status` завершается с ошибкой, и дежурный запускает откат.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sport-service
+  namespace: production
+  labels:
+    app.kubernetes.io/name: sport-service
+    app.kubernetes.io/part-of: smart-campus
+    app.kubernetes.io/version: "1.6.0"
+  annotations:
+    kubernetes.io/change-cause: "CR-2026-110 [CAMPUS-110] sport-service 1.6.0: TimeSlot -> TimeRange, OpenTelemetry tags"
+    campus.university.edu/jira-issue: "CAMPUS-110"
+    campus.university.edu/change-request: "CR-2026-110"
+spec:
+  replicas: 3
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 180
+  minReadySeconds: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sport-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sport-service
+        app.kubernetes.io/part-of: smart-campus
+        app.kubernetes.io/version: "1.6.0"
+      annotations:
+        campus.university.edu/jira-issue: "CAMPUS-110"
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654          # пользователь app в образах mcr.microsoft.com/dotnet/aspnet:8.0
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: sport-service
+          image: registry.campus.local/sport-service:1.6.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            # Фаза Expand: сервис пишет в time_slot и time_range (dual write)
+            - name: BookingSchema__Phase
+              value: "Expand"
+            # Экспорт трасс по OTLP в коллектор → Jaeger
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.observability:4317"
+            - name: ConnectionStrings__Campus
+              valueFrom:
+                secretKeyRef:
+                  name: sport-service-db
+                  key: connection-string
+            - name: Sanity__Token
+              valueFrom:
+                secretKeyRef:
+                  name: sport-service-sanity
+                  key: token
+                  optional: true
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sport-service
+  namespace: production
+  labels:
+    app.kubernetes.io/name: sport-service
+    app.kubernetes.io/part-of: smart-campus
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: sport-service
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

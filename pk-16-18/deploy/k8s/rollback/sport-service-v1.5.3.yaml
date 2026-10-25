@@ -1,0 +1,111 @@
+# Манифест отката sport-service на предыдущую стабильную версию v1.5.3
+# Change Request: CR-2026-110, раздел 5 «План отката». Задача Jira: CAMPUS-110
+#
+# Основной способ отката — команда (≈ 30 секунд, ReplicaSet v1.5.3 уже есть в кластере):
+#   kubectl rollout undo deployment/sport-service -n production
+#   kubectl rollout status deployment/sport-service -n production
+#
+# Этот манифест — резервный (декларативный) способ. Применяется, если:
+#   * история ревизий потеряна (Deployment пересоздан, revisionHistoryLimit исчерпан);
+#   * откат выполняется через GitOps: манифест коммитится в main и применяется CD;
+#   * `rollout undo` вернул не ту ревизию (проверка: kubectl rollout history ...).
+#
+#   kubectl apply -f deploy/k8s/rollback/sport-service-v1.5.3.yaml
+#   kubectl rollout status deployment/sport-service -n production --timeout=10m
+#   kubectl get deployment sport-service -n production \
+#     -o jsonpath='{.spec.template.spec.containers[0].image}'   # ожидаем ...:1.5.3
+#
+# Откат БД НЕ нужен: после фазы Expand v1.5.3 работает со старой колонкой time_slot,
+# а триггер синхронизации заполняет time_range. После фазы Contract (CR-2026-118)
+# этот манифест применять нельзя — колонки time_slot уже нет.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sport-service
+  namespace: production
+  labels:
+    app.kubernetes.io/name: sport-service
+    app.kubernetes.io/part-of: smart-campus
+    app.kubernetes.io/version: "1.5.3"
+  annotations:
+    kubernetes.io/change-cause: "ROLLBACK CR-2026-110 [CAMPUS-110]: sport-service 1.6.0 -> 1.5.3 (5xx > 3% or failed sanity test)"
+    campus.university.edu/jira-issue: "CAMPUS-110"
+    campus.university.edu/change-request: "CR-2026-110"
+spec:
+  replicas: 3
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 180
+  minReadySeconds: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sport-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sport-service
+        app.kubernetes.io/part-of: smart-campus
+        app.kubernetes.io/version: "1.5.3"
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: sport-service
+          image: registry.campus.local/sport-service:1.5.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.observability:4317"
+            - name: ConnectionStrings__Campus
+              valueFrom:
+                secretKeyRef:
+                  name: sport-service-db
+                  key: connection-string
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
