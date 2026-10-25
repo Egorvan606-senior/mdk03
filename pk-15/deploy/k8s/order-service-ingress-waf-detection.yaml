@@ -1,0 +1,42 @@
+# CH-1 релиза 2.0.0 (кейс 10): WAF перед API OrderService — режим DetectionOnly (ОТКАТ CH-1, Runbook RB-002).
+# ModSecurity + OWASP Core Rule Set на Ingress NGINX.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: order-service
+  namespace: production
+  annotations:
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
+    # Защита от DDoS на уровне L7: не более 50 запросов/с с одного IP
+    nginx.ingress.kubernetes.io/limit-rps: "50"
+    nginx.ingress.kubernetes.io/proxy-body-size: "64k"
+    nginx.ingress.kubernetes.io/modsecurity-transaction-id: "$request_id"
+    nginx.ingress.kubernetes.io/modsecurity-snippet: |
+      # Откат: правила журналируют срабатывания, но НЕ блокируют запросы
+      SecRuleEngine DetectionOnly
+      SecRequestBodyAccess On
+      SecRequestBodyLimit 65536
+      SecAuditEngine RelevantOnly
+      # Уровень строгости OWASP CRS
+      SecAction "id:900000,phase:1,nolog,pass,t:none,setvar:tx.blocking_paranoia_level=1"
+      # JSON-тело разбирается на поля: правила проверяют значения, а не сырой текст
+      SecRule REQUEST_HEADERS:Content-Type "@contains application/json" \
+        "id:1000001,phase:1,pass,nolog,ctl:requestBodyProcessor=JSON"
+      # Исключение по итогам 7 дней DetectionOnly: свободный текст комментария заказа
+      # мобильного приложения не проверяется правилом 942430 (много спецсимволов)
+      SecRule REQUEST_URI "@beginsWith /api/v1/orders" \
+        "id:1000002,phase:1,pass,nolog,ctl:ruleRemoveTargetById=942430;ARGS:json.comment"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: orders.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 80

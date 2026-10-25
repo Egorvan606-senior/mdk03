@@ -1,0 +1,23 @@
+### Smoke-тесты OrderService 2.0.0 — запускаются кнопкой «Send request» в Visual Studio
+@host = http://localhost:5115
+
+### 1. GET /health — ожидаем 200, Healthy, version 2.0.0, database Connected
+GET {{host}}/health
+
+### 3. Сложный JSON мобильного приложения — WAF должен ПРОПУСТИТЬ (201 Created)
+POST {{host}}/api/v1/orders
+Content-Type: application/json
+
+{
+  "customerId": "mobile-user-10",
+  "channel": "mobile",
+  "items": [
+    { "sku": "PIZZA-30", "name": "Пицца «4 сыра»", "quantity": 2, "price": 649.00, "options": { "size": "30 см", "crust": "тонкое" } },
+    { "sku": "DRINK-05", "name": "Morse 0.5 l", "quantity": 1, "price": 120.00 }
+  ],
+  "delivery": { "address": "ул. O'Connor, д. 5", "entrance": "2", "floor": "7", "timeSlot": "18:00-19:00" },
+  "comment": "Select the fastest courier please; order by phone. Don't ring \"twice\""
+}
+
+### 4. Контрольная SQL-инъекция — WAF должен ЗАБЛОКИРОВАТЬ (403, ruleId 942130)
+GET {{host}}/api/v1/orders/00000000-0000-0000-0000-000000000001?search=1'%20OR%20'1'='1

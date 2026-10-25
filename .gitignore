@@ -1,8 +1,11 @@
-bin/
-obj/
-.vs/
-*.user
+*.db
 *.suo
+*.user
+.vs/
+SmartCampus/
 TestResults/
-out/
+bin/
 logs/
+obj/
+out/
+reports/

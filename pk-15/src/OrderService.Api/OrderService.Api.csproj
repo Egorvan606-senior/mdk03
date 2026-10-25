@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    ПК № 15, вариант 10 (кейс 10 «Внедрение защищённого WAF перед API»).
+    OrderService — учебный сервис заказов для отработки релизного процесса:
+    окно обслуживания, smoke-тесты, план отката, Runbook и ADR (папка docs/).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>OrderService</RootNamespace>
+    <Version>2.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- SQLite через EF Core: для smoke-теста DbContext.Database.CanConnect() -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,24 @@
+{
+  "profiles": {
+    "OrderService (WAF On)": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "applicationUrl": "http://localhost:5115",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "OrderService (откат: WAF DetectionOnly)": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "applicationUrl": "http://localhost:5115",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Waf__Mode": "DetectionOnly",
+        "Payments__Provider": "Legacy"
+      }
+    }
+  }
+}
