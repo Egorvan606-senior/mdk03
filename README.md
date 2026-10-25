@@ -8,3 +8,9 @@
 | № 5 | Безопасные релизные процессы, Expand and Contract, Docs-as-Code (CAMPUS-110, «Спортивный комплекс») | [homework-5](homework-5/REPORT.md) |
 | № 6 | CALS-технологии: регламент обновления АРМ, тестер Health Check после обновления | [homework-6](homework-6) |
 | № 7 | Сценарий внедрения ПО на АРМ, генератор ведомости питания | [homework-7](homework-7) |
+| ПК № 15 | Релизный процесс OrderService: окно обслуживания, smoke-тесты, план отката, Runbook, ADR (кейс 10 — WAF перед API) | [pk-15](pk-15) |
+| ПК № 16–18 | CALS: цифровой след CAMPUS-110, Branch Protection, Change Request v1.6.0, Expand and Contract, sanity-тест, Runbook, ADR, Changelog | [pk-16-18](pk-16-18) |
+| ПК № 19 | Генератор суточных отчётов по транзакциям питания (C#, CSV, SHA-256) | [pk-19](pk-19) |
+| ПК № 20 | АРМ дежурного: мониторинг API, Serilog, экспорт ведомости питания по категориям льгот | [pk-20](pk-20) |
+
+ПК — промежуточный контроль к занятиям Темы 1.1 (ЭИОС СПбИЭУ).
