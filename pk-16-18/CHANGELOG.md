@@ -26,14 +26,15 @@
   слот бронирования хранится как диапазон времени `[начало, конец)`.
 - [CAMPUS-110] Поле `timeRange { start, end }` и `durationMinutes` в API
   `POST/GET /api/v1/sport/bookings`; запрос принимает новый формат слота.
-- [CAMPUS-110] Трассировка OpenTelemetry: теги `jira.issue`, `campus.booking_id`,
-  `campus.facility_id`, `campus.time_range`; заголовок ответа `X-Trace-Id`.
+- [CAMPUS-110] Трассировка OpenTelemetry: теги `jira.issue`, `campus.entity_id`, `campus.booking_id`,
+  `campus.facility_id`, `campus.time_range`; заголовок ответа `X-Trace-Id`; TraceId в каждой строке лога.
 - [CAMPUS-110] Двойная запись (dual write) в `time_slot` и `time_range`,
   режим переключается настройкой `BookingSchema:Phase`.
 - [CAMPUS-110] Миграции Expand and Contract: `01_expand.sql`, `02_migrate.sql`,
   `03_contract.sql`, скрипт отката `rollback/01_expand_down.sql`.
 - [CAMPUS-110] Production sanity-тест с очисткой тестовых данных (Cleanup)
-  и служебный эндпоинт удаления записей `sanity-bot`.
+  и служебный эндпоинт удаления записей `sanity-bot`; стенд-тесты того же сценария для CI.
+- [CAMPUS-110] Runbook `DatabaseConnectionPoolExhausted`, правила защиты ветки `main`, CI-проверки `xunit-tests` и `db-migrations`.
 
 ### Fixed
 - [CAMPUS-110] Двойное бронирование зала при одновременных запросах: проверка
