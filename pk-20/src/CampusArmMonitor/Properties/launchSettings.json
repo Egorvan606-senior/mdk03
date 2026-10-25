@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "Мониторинг и экспорт ведомости": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "CAMPUS_STATION_ID": "CANTEEN-A1-ARM-01"
+      }
+    },
+    "Сбой: API недоступен": {
+      "commandName": "Project",
+      "commandLineArgs": "--url https://jsonplaceholder.invalid/posts",
+      "environmentVariables": {
+        "CAMPUS_STATION_ID": "CANTEEN-A1-ARM-01"
+      }
+    }
+  }
+}
