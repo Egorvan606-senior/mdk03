@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "Sport API (стенд, трассы в консоль)": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "applicationUrl": "http://localhost:5110",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Telemetry__ConsoleExporter": "true",
+        "Sanity__Token": "local-sanity-token",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317"
+      }
+    }
+  }
+}
