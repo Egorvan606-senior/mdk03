@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    ПК № 19, вариант 10. ИС «Умный кампус».
+    Генератор суточных отчётов по транзакциям питания в столовой.
+    Только стандартная библиотека .NET 8 (HttpClient, System.Text.Json) — без NuGet-пакетов,
+    поэтому утилита собирается на любом АРМ, где есть .NET 8 SDK.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Campus.MealDailyReport</RootNamespace>
+    <AssemblyName>campus-meal-daily-report</AssemblyName>
+    <Version>1.0.0</Version>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Базовые настройки (Docs-as-Code: конфигурация лежит в репозитории рядом с кодом) -->
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

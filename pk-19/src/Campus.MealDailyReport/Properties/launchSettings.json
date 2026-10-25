@@ -1,0 +1,26 @@
+{
+  "profiles": {
+    "Отчёт за 24.10.2026": {
+      "commandName": "Project",
+      "commandLineArgs": "--date 2026-10-24",
+      "environmentVariables": {
+        "CAMPUS_STATION_ID": "CANTEEN-A1-POS-01",
+        "CAMPUS_OPERATOR_ID": "Иванов Е.М."
+      }
+    },
+    "Отчёт за сегодня": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "CAMPUS_STATION_ID": "CANTEEN-A1-POS-01",
+        "CAMPUS_OPERATOR_ID": "Иванов Е.М."
+      }
+    },
+    "Сбой сети (неверный адрес API)": {
+      "commandName": "Project",
+      "commandLineArgs": "--date 2026-10-24 --source https://jsonplaceholder.invalid/posts",
+      "environmentVariables": {
+        "CAMPUS_OPERATOR_ID": "Иванов Е.М."
+      }
+    }
+  }
+}
