@@ -34,7 +34,10 @@
   `03_contract.sql`, скрипт отката `rollback/01_expand_down.sql`.
 - [CAMPUS-110] Production sanity-тест с очисткой тестовых данных (Cleanup)
   и служебный эндпоинт удаления записей `sanity-bot`; стенд-тесты того же сценария для CI.
-- [CAMPUS-110] Runbook `DatabaseConnectionPoolExhausted`, правила защиты ветки `main`, CI-проверки `xunit-tests` и `db-migrations`.
+- [CAMPUS-110] Runbook `DatabaseConnectionPoolExhausted`, правила защиты ветки `main`, CI-проверки `xunit-tests`, `db-migrations` и `k8s-manifests`.
+- [CAMPUS-110] Манифесты Kubernetes: `deploy/k8s/sport-service.yaml` (RollingUpdate без простоя,
+  readiness/liveness `/health`, история ревизий для `kubectl rollout undo`) и манифест отката
+  `deploy/k8s/rollback/sport-service-v1.5.3.yaml`.
 
 ### Fixed
 - [CAMPUS-110] Двойное бронирование зала при одновременных запросах: проверка

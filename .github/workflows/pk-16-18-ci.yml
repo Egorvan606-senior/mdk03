@@ -53,3 +53,19 @@ jobs:
 
       - name: Expand -> Migrate -> Contract на PostgreSQL 16
         run: bash pk-16-18/db/test/run_migration_test.sh
+
+  k8s-manifests:
+    name: k8s-manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install kubernetes-validate
+        run: pip install kubernetes-validate==1.37.0
+
+      - name: Манифесты Deployment и отката по схеме Kubernetes 1.30 (strict)
+        run: kubernetes-validate --strict -k 1.30.0 pk-16-18/deploy/k8s/*.yaml pk-16-18/deploy/k8s/rollback/*.yaml

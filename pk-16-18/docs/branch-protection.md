@@ -10,7 +10,7 @@
 |---|---|
 | Запрет прямого пуша | **Require a pull request before merging** ✅ + **Do not allow bypassing the above settings** ✅ (правило действует и для администраторов) |
 | Force Push is disabled | **Allow force pushes** ❌, **Allow deletions** ❌ — история `main` неизменна |
-| Обязательное прохождение CI/CD тестов (xUnit) | **Require status checks to pass before merging** ✅ → обязательные проверки **`xunit-tests`** и **`db-migrations`**; **Require branches to be up to date** ✅ |
+| Обязательное прохождение CI/CD тестов (xUnit) | **Require status checks to pass before merging** ✅ → обязательные проверки **`xunit-tests`**, **`db-migrations`** и **`k8s-manifests`**; **Require branches to be up to date** ✅ |
 | Минимум 2 одобрения коллег (Peer Review) | **Required approvals: 3** (2 коллеги + Tech Lead) |
 | 1 одобрение Tech Lead | **Require review from Code Owners** ✅ — владелец всех файлов в `CODEOWNERS` — группа `@campus/tech-leads`, без её одобрения кнопка Merge недоступна |
 | Одобрение относится к актуальному коду | **Dismiss stale pull request approvals when new commits are pushed** ✅, **Require approval of the most recent reviewable push** ✅ |
@@ -45,7 +45,7 @@ Settings → Rules → Rulesets → New branch ruleset → **Restrict commit met
 gh api -X PUT repos/<owner>/<repo>/branches/main/protection \
   -H "Accept: application/vnd.github+json" --input - <<'JSON'
 {
-  "required_status_checks": { "strict": true, "contexts": ["xunit-tests", "db-migrations"] },
+  "required_status_checks": { "strict": true, "contexts": ["xunit-tests", "db-migrations", "k8s-manifests"] },
   "enforce_admins": true,
   "required_pull_request_reviews": {
     "required_approving_review_count": 3,
@@ -76,4 +76,6 @@ Workflow `.github/workflows/pk-16-18-ci.yml` создаёт ровно те пр
 
 * `xunit-tests` — `dotnet build` + `dotnet test --filter Category!=Sanity` (модульные и интеграционные xUnit-тесты);
 * `db-migrations` — поднимает PostgreSQL 16 и выполняет `db/test/run_migration_test.sh`
-  (Expand дважды, откат, Migrate, отказ Contract при ошибках, Contract, запрет пересечений).
+  (Expand дважды, откат, Migrate, отказ Contract при ошибках, Contract, запрет пересечений);
+* `k8s-manifests` — проверяет `deploy/k8s/*.yaml` и манифест отката по схеме Kubernetes 1.30
+  в строгом режиме (`kubernetes-validate --strict`): опечатка в поле манифеста не попадёт в `main`.
